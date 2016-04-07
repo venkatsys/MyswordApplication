@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by test on 4/6/2016.
@@ -45,8 +46,8 @@ public class SwordContentProvider  extends ContentProvider {
         final UriMatcher matcher = uriMatcher;
         matcher.addURI(AUTHORITY, "sword/section/add", SECTIONINSERT);
         matcher.addURI(AUTHORITY, "sword/*/get", FEEDSECTION);
-        matcher.addURI(AUTHORITY, "sword/section/delete", SECTIONDELETE);
         matcher.addURI(AUTHORITY, "sword/*/update", SECTIONUPDATECODE);
+        matcher.addURI(AUTHORITY, "sword/*/delete", SECTIONDELETE);
     }
 
     /**
@@ -107,16 +108,20 @@ public class SwordContentProvider  extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int row = 0;
         int matched = uriMatcher.match(uri);
+        Log.i("del", "ID is" + matched);
         try {
             switch (uriMatcher.match(uri)) {
                 case SECTIONDELETE:
-                    this.getDb().execSQL("delete from " + DatabaseHelper.DONE_SWORD_SECTION);
+                    CategoryID = "";
+                    CategoryID = uri.getPathSegments().get(1);
+                    row = this.getDb().delete(DatabaseHelper.DONE_SWORD_SECTION, DatabaseHelper.COLUMN_SECTIONID + "='" + CategoryID + "'", selectionArgs);
+                    //this.getDb().execSQL("delete from " + DatabaseHelper.DONE_SWORD_SECTION);
                     break;
             }
         }catch(SQLException e){
             e.printStackTrace();
         }
-        return 0;
+        return row;
     }
 
     @Override

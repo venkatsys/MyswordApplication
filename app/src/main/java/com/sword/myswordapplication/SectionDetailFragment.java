@@ -1,11 +1,14 @@
 package com.sword.myswordapplication;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +26,7 @@ public class SectionDetailFragment extends Fragment implements View.OnClickListe
     public SectionDetailFragment(){}
     private SectionValues msectionValues;
     private TextView sectionName, sectiondesc;
-    private Button updateButton;
+    private Button updateButton,deleteButton;
     private Uri todoUri = null;
     private String mtitle , mDesc;
 
@@ -48,13 +51,23 @@ public class SectionDetailFragment extends Fragment implements View.OnClickListe
 
         }
         this.updateButton = (Button) view.findViewById(R.id.button);
+        this.deleteButton = (Button) view.findViewById(R.id.delButton);
         this.updateButton.setOnClickListener(this);
+        this.deleteButton.setOnClickListener(this);
         return view;
     }
 
     @Override
     public void onClick(View v) {
-        toUpdateDB();
+        switch (v.getId()){
+            case R.id.button:
+                toUpdateDB();
+                break;
+            case R.id.delButton:
+                toDeleteDB();
+                break;
+        }
+
     }
 
     /**
@@ -66,7 +79,44 @@ public class SectionDetailFragment extends Fragment implements View.OnClickListe
         cv.put(DatabaseHelper.COLUMN_SECTIONDESCRIPTION, (this.sectiondesc.getText().toString().isEmpty() ? mDesc : this.sectiondesc.getText().toString()));
         todoUri = Uri.parse("content://com.swordfeed/sword/" + msectionValues.getSectionID() + "/update");
         SwordApplication.getAppContext().getContentResolver().update(todoUri, cv, null, null);
+        toGotoNextScreen();
+    }
+
+    /**
+     * Method to Delete Database
+     */
+    private void toDeleteDB(){
+        AlertDialog.Builder alert = new AlertDialog.Builder(getActivity(), AlertDialog.THEME_TRADITIONAL);
+        alert.setTitle("Confirm Delete");
+        alert.setMessage("Are u sure want to delete");
+        alert.setIcon(R.drawable.fail);
+        alert.setPositiveButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        todoUri = Uri.parse("content://com.swordfeed/sword/" + msectionValues.getSectionID() + "/delete");
+                        int row = SwordApplication.getAppContext().getContentResolver().delete(todoUri, null, null);
+                        Log.i("del", "ID is" + row + msectionValues.getSectionID());
+                        if(row > 0){
+                            toGotoNextScreen();
+                        }
+                    }
+                });
+
+        alert.setNegativeButton("No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+        alert.show();
+    }
+
+    /**
+     * Method to Goto Next Screen
+     */
+    private void toGotoNextScreen(){
         Intent intent = new Intent(getActivity(), SwordMainAcitivity.class);
         startActivity(intent);
     }
+
 }

@@ -117,6 +117,7 @@ public class SectionDetailFragment extends Fragment implements View.OnClickListe
     private void toGotoNextScreen(){
         Intent intent = new Intent(getActivity(), SwordMainAcitivity.class);
         startActivity(intent);
+        getActivity().finish();
     }
 
 }
